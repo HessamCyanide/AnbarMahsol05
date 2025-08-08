@@ -4,15 +4,103 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>سیستم مدیریت انبار محصول</title>
+    <title>سیستم مدیریت انبار محصول تسکو</title>
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0d9488" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
       body {
         font-family: 'Vazirmatn', sans-serif;
+      }
+      /* Hide spin buttons on number inputs for a cleaner look */
+      input[type=number]::-webkit-inner-spin-button, 
+      input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+      }
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
+      @media print {
+        body {
+          background-color: white !important;
+          color: black !important;
+          min-width: unset !important;
+        }
+        /* Hide everything except the cardex modal wrapper */
+        body > #root > div > *:not(.cardex-modal-print-wrapper) {
+          display: none !important;
+        }
+        /* Make the cardex modal content fill the page */
+        .cardex-modal-print-wrapper {
+          position: static !important;
+          display: block !important;
+          background-color: white !important;
+          border: none !important;
+          padding: 1in !important;
+          margin: 0 !important;
+          box-shadow: none !important;
+        }
+        .cardex-modal-content {
+          box-shadow: none !important;
+          max-height: none !important;
+          padding: 0 !important;
+          border: none !important;
+          background-color: white !important;
+          color: black !important;
+        }
+        /* Hide buttons and unnecessary elements inside the modal */
+        .print-hide {
+          display: none !important;
+        }
+        .cardex-modal-content h2, .cardex-modal-content p, .cardex-modal-content div, .cardex-modal-content span {
+            color: black !important;
+        }
+        .cardex-modal-content .header-info {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+         .cardex-modal-content .header-info h2 {
+            font-size: 18pt;
+            font-weight: bold;
+        }
+        .cardex-modal-content .header-info p {
+            font-size: 12pt;
+        }
+
+        /* Style table for printing */
+        .cardex-modal-content table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 10pt;
+        }
+        .cardex-modal-content th,
+        .cardex-modal-content td {
+          border: 1px solid #999;
+          padding: 8px;
+          text-align: center;
+          color: black !important;
+        }
+        .cardex-modal-content thead {
+          background-color: #e0e0e0 !important;
+        }
+         .cardex-modal-content th {
+          font-weight: bold;
+        }
+        /* Hide mobile view, force desktop table */
+        .cardex-modal-content .md\:hidden {
+            display: none !important;
+        }
+        .cardex-modal-content .hidden.md\:table {
+            display: table !important;
+        }
+        @page {
+          size: A4;
+          margin: 0.5in;
+        }
       }
     </style>
   <script type="importmap">

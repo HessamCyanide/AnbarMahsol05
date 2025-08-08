@@ -1,12 +1,14 @@
-const CACHE_NAME = 'inventory-app-cache-v1';
+
+
+const CACHE_NAME = 'inventory-app-cache-v2';
 const LOCAL_ASSETS = [
     '/',
     '/index.html',
     '/index.tsx',
     '/App.tsx',
     '/types.ts',
-    '/components/constants.ts',
-    '/hooks/useLocalStorage.ts',
+    '/constants.ts',
+    '/hooks/useDatabase.ts',
     '/components/icons.tsx',
     '/components/StatCard.tsx',
     '/components/AddProductModal.tsx',
@@ -19,6 +21,9 @@ const LOCAL_ASSETS = [
     '/components/ConfirmationModal.tsx',
     '/components/MultiSelect.tsx',
     '/components/SearchableSelect.tsx',
+    '/components/Login.tsx',
+    '/components/UserManagementModal.tsx',
+    '/components/ProfileModal.tsx',
     '/manifest.json',
     '/icon.svg',
 ];

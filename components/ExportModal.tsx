@@ -1,9 +1,11 @@
+
+
 import React, { useState, useEffect } from 'react';
 
 interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onExport: (options: { dataType: 'products' | 'transactions' | 'lowStock', columns: { [key: string]: boolean }}) => void;
+  onExport: (options: { dataType: 'products' | 'transactions' | 'lowStock' | 'finished', columns: { [key: string]: boolean }}) => void;
 }
 
 const productColumns = {
@@ -17,13 +19,13 @@ const productColumns = {
 const transactionColumns = {
   productName: 'نام محصول',
   type: 'نوع عملیات',
-  invoiceNumber: 'شماره فاکتور',
+  invoiceNumber: 'شماره فاکتور/یادداشت',
   quantityChange: 'تغییر تعداد',
   timestamp: 'تاریخ و زمان',
 };
 
 const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, onExport }) => {
-  const [dataType, setDataType] = useState<'products' | 'transactions' | 'lowStock'>('products');
+  const [dataType, setDataType] = useState<'products' | 'transactions' | 'lowStock' | 'finished'>('products');
   const [selectedColumns, setSelectedColumns] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
@@ -36,7 +38,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, onExport }) 
 
   if (!isOpen) return null;
 
-  const handleDataTypeChange = (type: 'products' | 'transactions' | 'lowStock') => {
+  const handleDataTypeChange = (type: 'products' | 'transactions' | 'lowStock' | 'finished') => {
     setDataType(type);
     const initialColumns = type === 'transactions' ? transactionColumns : productColumns;
     const newSelectedColumns = {};
@@ -76,6 +78,9 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, onExport }) 
               </button>
               <button type="button" onClick={() => handleDataTypeChange('lowStock')} className={`flex-1 py-2 rounded-md transition-colors ${dataType === 'lowStock' ? 'bg-teal-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}`}>
                 کالاهای ته انباری
+              </button>
+               <button type="button" onClick={() => handleDataTypeChange('finished')} className={`flex-1 py-2 rounded-md transition-colors ${dataType === 'finished' ? 'bg-teal-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}`}>
+                کالاهای تمام شده
               </button>
             </div>
           </div>

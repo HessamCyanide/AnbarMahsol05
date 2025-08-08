@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Product, Transaction } from '../types';
+import { PrintIcon } from './icons';
 
 interface ProductCardexModalProps {
   isOpen: boolean;
@@ -13,48 +14,51 @@ const ProductCardexModal: React.FC<ProductCardexModalProps> = ({ isOpen, onClose
   const cardexData = useMemo(() => {
     const sortedTransactions = [...transactions].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
     
-    // Calculate the initial quantity before any recorded transactions
-    const totalChange = transactions.reduce((sum, tx) => sum + tx.quantityChange, 0);
-    let runningBalance = product.quantity - totalChange;
+    let runningBalance = product.quantity - transactions.reduce((sum, tx) => sum + tx.quantityChange, 0);
     
     const data = sortedTransactions.map(tx => {
-        const balanceBefore = runningBalance;
         runningBalance += tx.quantityChange;
-        const balanceAfter = runningBalance;
-        
-        return {
-            ...tx,
-            balanceBefore,
-            balanceAfter
-        };
+        return { ...tx, balanceAfter: runningBalance };
     });
     
-    return data.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // Sort back to descending for display
+    return data.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }, [product, transactions]);
 
   if (!isOpen) return null;
   
   const getTransactionTypeInfo = (tx: Transaction) => ({
-    purchase: { text: 'ورود (خرید)', color: 'text-green-400' },
-    sale: { text: 'خروج (فروش)', color: 'text-red-400' },
+    purchase: { text: 'ورود', color: 'text-green-400' },
+    sale: { text: 'خروج', color: 'text-red-400' },
     adjustment: { text: `اصلاح دستی`, color: 'text-yellow-400' },
+    recount: { text: 'شمارش مجدد', color: 'text-cyan-400' },
   }[tx.type]);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-4xl m-4 max-h-[90vh] flex flex-col">
-        <div className="border-b border-gray-600 pb-4 mb-4">
-            <h2 className="text-2xl font-bold text-white">کاردکس کالا: {product.name}</h2>
-            <p className="text-sm text-gray-400">موجودی فعلی: <span className="font-bold text-teal-400">{product.quantity}</span></p>
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 cardex-modal-print-wrapper">
+      <div className="bg-gray-800 p-4 sm:p-8 rounded-lg shadow-xl w-full max-w-4xl m-4 max-h-[90vh] flex flex-col cardex-modal-content">
+        <div className="border-b border-gray-600 pb-4 mb-4 flex justify-between items-center header-info">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">کاردکس کالا: {product.name}</h2>
+              <p className="text-sm text-gray-400 mt-1">موجودی فعلی: <span className="font-bold text-teal-400 font-mono">{product.quantity.toLocaleString('en-US')}</span></p>
+            </div>
+            <button
+                type="button"
+                onClick={() => window.print()}
+                className="print-hide flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition-colors"
+                title="پرینت کاردکس"
+            >
+                <PrintIcon className="w-5 h-5" />
+                <span>پرینت</span>
+            </button>
         </div>
         
-        <div className="overflow-y-auto flex-grow">
-            <table className="min-w-full divide-y divide-gray-700">
-                <thead className="bg-gray-700/50 sticky top-0">
+        <div className="overflow-y-auto flex-grow -mx-4 sm:-mx-8 px-4 sm:px-8">
+            <table className="hidden md:table min-w-full divide-y divide-gray-700">
+                <thead className="bg-gray-700/50 sticky top-0 z-10">
                     <tr>
                         <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">تاریخ</th>
                         <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">نوع عملیات</th>
-                        <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">فاکتور</th>
+                        <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">فاکتور/یادداشت</th>
                         <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">ورودی</th>
                         <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">خروجی</th>
                         <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">موجودی نهایی</th>
@@ -70,9 +74,9 @@ const ProductCardexModal: React.FC<ProductCardexModalProps> = ({ isOpen, onClose
                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-400 text-center">{new Date(tx.timestamp).toLocaleString('fa-IR')}</td>
                                     <td className={`px-4 py-3 whitespace-nowrap text-sm font-semibold ${typeInfo.color} text-center`}>{typeInfo.text}</td>
                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300 text-center">{tx.invoiceNumber}</td>
-                                    <td className="px-4 py-3 text-center whitespace-nowrap text-sm font-mono text-green-400">{isIncoming ? tx.quantityChange : '-'}</td>
-                                    <td className="px-4 py-3 text-center whitespace-nowrap text-sm font-mono text-red-400">{!isIncoming ? Math.abs(tx.quantityChange) : '-'}</td>
-                                    <td className="px-4 py-3 text-center whitespace-nowrap text-sm font-mono font-bold text-white">{tx.balanceAfter}</td>
+                                    <td className="px-4 py-3 text-center whitespace-nowrap text-sm font-mono text-green-400">{isIncoming ? tx.quantityChange.toLocaleString('en-US') : '-'}</td>
+                                    <td className="px-4 py-3 text-center whitespace-nowrap text-sm font-mono text-red-400">{!isIncoming ? Math.abs(tx.quantityChange).toLocaleString('en-US') : '-'}</td>
+                                    <td className="px-4 py-3 text-center whitespace-nowrap text-sm font-mono font-bold text-white">{tx.balanceAfter.toLocaleString('en-US')}</td>
                                 </tr>
                             )
                         })
@@ -81,9 +85,42 @@ const ProductCardexModal: React.FC<ProductCardexModalProps> = ({ isOpen, onClose
                     )}
                 </tbody>
             </table>
+
+            <div className="md:hidden divide-y divide-gray-700">
+                {cardexData.length > 0 ? (
+                    cardexData.map(tx => {
+                        const typeInfo = getTransactionTypeInfo(tx);
+                        const isIncoming = tx.quantityChange > 0;
+                        return (
+                            <div key={tx.id} className="p-3">
+                                <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div className={`font-semibold ${typeInfo.color}`}>{typeInfo.text}</div>
+                                        <div className="text-xs text-gray-400">{new Date(tx.timestamp).toLocaleString('fa-IR')}</div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="font-mono font-bold text-lg text-white">{tx.balanceAfter.toLocaleString('en-US')}</div>
+                                        <div className="text-xs text-gray-400">موجودی نهایی</div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                    <div className="text-gray-300 truncate pr-2">
+                                      <span className="text-gray-500">فاکتور/یادداشت: </span>{tx.invoiceNumber}
+                                    </div>
+                                    <div className={`font-mono ${isIncoming ? 'text-green-400' : 'text-red-400'}`}>
+                                        {isIncoming ? `+${tx.quantityChange.toLocaleString('en-US')}` : `-${Math.abs(tx.quantityChange).toLocaleString('en-US')}`}
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })
+                ) : (
+                    <p className="text-center py-10 text-gray-400">هیچ تراکنشی برای این محصول ثبت نشده است.</p>
+                )}
+            </div>
         </div>
         
-        <div className="mt-8 flex justify-end">
+        <div className="mt-8 flex justify-end print-hide">
             <button type="button" onClick={onClose} className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-500 transition-colors">بستن</button>
         </div>
       </div>

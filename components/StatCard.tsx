@@ -14,9 +14,9 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, colorClass }) =
       <div className={`p-3 rounded-full ${colorClass}`}>
         {icon}
       </div>
-      <div>
+      <div className="min-w-0">
         <p className="text-gray-400 text-sm font-medium">{title}</p>
-        <p className="text-2xl font-bold text-white">{value}</p>
+        <p className="text-2xl font-bold text-white font-mono break-all">{typeof value === 'number' ? value.toLocaleString('en-US') : value}</p>
       </div>
     </div>
   );
